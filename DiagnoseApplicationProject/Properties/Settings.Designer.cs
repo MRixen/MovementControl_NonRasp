@@ -80,9 +80,9 @@ namespace WindowsFormsApplication6.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=(localdb)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Manuel.Rixen\\Desktop" +
-            "\\DataBase_MovementControl\\DataBase\\Database1.mdf;Initial Catalog=Database1;Integ" +
-            "rated Security=True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=(localdb)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Manuel.Rixen\\Documen" +
+            "ts\\GitHub\\DataBase_MovementControl\\DataBase\\Database1.mdf;Initial Catalog=Databa" +
+            "se1;Integrated Security=True")]
         public string ConnectionString_DataBase {
             get {
                 return ((string)(this["ConnectionString_DataBase"]));

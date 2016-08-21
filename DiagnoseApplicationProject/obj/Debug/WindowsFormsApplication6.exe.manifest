@@ -66,14 +66,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="WindowsFormsApplication6.exe" size="4312512">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="WindowsFormsApplication6.exe" size="4313024">
       <assemblyIdentity name="WindowsFormsApplication6" version="1.0.0.0" language="neutral" processorArchitecture="amd64" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>vB1iXbGSI6TZ9IoJG6vQvAkWaUTRTLUBRsZLAluh1t0=</dsig:DigestValue>
+        <dsig:DigestValue>vo7BiKmz7BEY1b2akxukXXQZIIscxanR1jI5qSobUJM=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -86,13 +86,13 @@
       <dsig:DigestValue>gdex4jexgr2iL7TjwiNwScf/pAqMB2iFbou5YepUUvc=</dsig:DigestValue>
     </hash>
   </file>
-  <file name="WindowsFormsApplication6.exe.config" size="2169">
+  <file name="WindowsFormsApplication6.exe.config" size="2178">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>HIEzXZJmSPZ8XO1P1uueNTjc2f00QEvyC2pODKWx7NM=</dsig:DigestValue>
+      <dsig:DigestValue>RLojSHUMzhHszs9hPpc3ONvl/k8hxDQRWlEtber/s5c=</dsig:DigestValue>
     </hash>
   </file>
 </asmv1:assembly>

@@ -32,7 +32,7 @@ namespace WindowsFormsApplication6
 
             // Set ids
             // Binär (i.e. 0000 0011 for motor 1 and 2)
-            ids = BitConverter.GetBytes((short)3);
+            ids = BitConverter.GetBytes((short)127);
             for (int i = 0; i < ids.Length; i++) byteArray[i + 2] = ids[i];
 
             // Set speed for dynamixel 1
@@ -43,25 +43,62 @@ namespace WindowsFormsApplication6
             speed = BitConverter.GetBytes((short)velocity);
             for (int i = 0; i < speed.Length; i++) byteArray[i + 6] = speed[i];
 
+            // Set speed for dynamixel 3
+            speed = BitConverter.GetBytes((short)velocity);
+            for (int i = 0; i < speed.Length; i++) byteArray[i + 8] = speed[i];
+
+            // Set speed for dynamixel 4
+            speed = BitConverter.GetBytes((short)velocity);
+            for (int i = 0; i < speed.Length; i++) byteArray[i + 10] = speed[i];
+
+            // Set speed for dynamixel 5
+            speed = BitConverter.GetBytes((short)velocity);
+            for (int i = 0; i < speed.Length; i++) byteArray[i + 12] = speed[i];
+
+            // Set speed for dynamixel 6
+            speed = BitConverter.GetBytes((short)velocity);
+            for (int i = 0; i < speed.Length; i++) byteArray[i + 14] = speed[i];
+
+            // Set speed for dynamixel 7
+            speed = BitConverter.GetBytes((short)velocity);
+            for (int i = 0; i < speed.Length; i++) byteArray[i + 16] = speed[i];
+
             for (int k = 0; k < steps; k++)
             {
                 counter = 0;
                 // TODO: Add length variable for the count of rows per table (not hardcoded 23!!!)
                 while (counter < 23)
                 {
-                    // Set position from database for dxl 1
+                    // TODO: Add more tables...
                     int dataT = (int)globalDataSet.DataSet.Tables[0].Rows[counter].ItemArray.GetValue(2);
 
+                    // Set position from database for dxl 1
                     position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
-                    //position = BitConverter.GetBytes((short)dataArray[counter]);
-                    for (int i = 0; i < position.Length; i++) byteArray[i + 8] = position[i];
+                    for (int i = 0; i < position.Length; i++) byteArray[i + 18] = position[i];
 
                     // Set position from database for dxl 2
-                    DataRow dataRow2 = globalDataSet.DataSet.Tables[0].Rows[counter];
-
                     position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
-                    //position = BitConverter.GetBytes((short)dataArray[counter]);
-                    for (int i = 0; i < position.Length; i++) byteArray[i + 10] = position[i];
+                    for (int i = 0; i < position.Length; i++) byteArray[i + 20] = position[i];
+
+                    // Set position from database for dxl 3
+                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
+                    for (int i = 0; i < position.Length; i++) byteArray[i + 22] = position[i];
+
+                    // Set position from database for dxl 4
+                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
+                    for (int i = 0; i < position.Length; i++) byteArray[i + 24] = position[i];
+
+                    // Set position from database for dxl 5
+                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
+                    for (int i = 0; i < position.Length; i++) byteArray[i + 26] = position[i];
+
+                    // Set position from database for dxl 6
+                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
+                    for (int i = 0; i < position.Length; i++) byteArray[i + 28] = position[i];
+
+                    // Set position from database for dxl 7
+                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
+                    for (int i = 0; i < position.Length; i++) byteArray[i + 30] = position[i];
 
                     counter++;
                     sendToPort(byteArray);
