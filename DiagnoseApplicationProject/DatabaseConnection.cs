@@ -11,7 +11,6 @@ namespace WindowsFormsApplication6
 {
     public class DatabaseConnection
     {
-        private int DATABASE_SIZE = 1;
         private string strCon;
         System.Data.SqlClient.SqlDataAdapter dataAdapter, dataAdapter1, dataAdapter2, dataAdapter3, dataAdapterX;
         private DataSet dataSet, dataSetX;
@@ -24,52 +23,38 @@ namespace WindowsFormsApplication6
             this.globalDataSet = globalDataSet;
         }
 
-        public void UpdateDatabase(DataSet dataSet, int tableID, string connString)
-        {
-            try
-            {
-                if (globalDataSet.DebugMode) Debug.Write("connString: " + connString);
-                // Create and open connection to specific database
-                dataBase_connection = new SqlConnection(connString);
-                dataBase_connection.Open();
-
-                dataAdapter = new SqlDataAdapter("SELECT * FROM tbl_rl_j0", dataBase_connection);
-
-                //dataAdapter1 = new SqlDataAdapter("SELECT * FROM tbl_rl_j1", dataBase_connection);
-
-                //dataAdapter2 = new SqlDataAdapter("SELECT * FROM tbl_rl_j2", dataBase_connection);
-
-                //dataAdapter3 = new SqlDataAdapter("SELECT * FROM tbl_rl_j3", dataBase_connection);
-
-                dataBase_connection.Close();
-
-                SqlCommandBuilder commandBuilder = new SqlCommandBuilder(dataAdapter);
-                commandBuilder.DataAdapter.Update(dataSet.Tables[0]);
-
-                //System.Data.SqlClient.SqlCommandBuilder commandBuilder1 = new System.Data.SqlClient.SqlCommandBuilder(dataAdapter1);
-                //commandBuilder1.DataAdapter.Update(dataSet.Tables[1]);
-
-                //System.Data.SqlClient.SqlCommandBuilder commandBuilder2 = new System.Data.SqlClient.SqlCommandBuilder(dataAdapter2);
-                //commandBuilder2.DataAdapter.Update(dataSet.Tables[2]);
-
-                //System.Data.SqlClient.SqlCommandBuilder commandBuilder3 = new System.Data.SqlClient.SqlCommandBuilder(dataAdapter3);
-                //commandBuilder3.DataAdapter.Update(dataSet.Tables[3]);
-            }
-            catch (DBConcurrencyException e)
-            {
-                if (globalDataSet.DebugMode) Debug.Write("Exception in UpdateDatabase():" + e);
-            }
-        }
-
         public int[] getTableSizeForDb(DataSet dataSet)
         {
-            maxTableRows = new int[DATABASE_SIZE];
-            for (int i = 0; i < DATABASE_SIZE; i++)
+            maxTableRows = new int[globalDataSet.MaxTableAmount];
+            for (int i = 0; i < globalDataSet.MaxTableAmount; i++)
             {
                 maxTableRows[i] = dataSet.Tables[i].Rows.Count;
             }
             return maxTableRows;
         }
+
+        public void UpdateLocalDatabase(DataSet dataSet, string connString)
+        {
+            try
+            {
+                if (globalDataSet.DebugMode) Debug.Write("connString: " + connString);
+                dataBase_connection = new SqlConnection(connString);
+                dataBase_connection.Open();
+                for (int i = 0; i < globalDataSet.MaxTableAmount; i++)
+                {
+                    SqlDataAdapter adapter = new SqlDataAdapter("SELECT * FROM tbl_rl_j"+i, dataBase_connection);
+                    SqlCommandBuilder cmdBuilder = new SqlCommandBuilder(adapter);
+                    cmdBuilder.DataAdapter.Update(dataSet.Tables[i]);
+                }
+                dataBase_connection.Close();
+            }
+            catch (DBConcurrencyException e)
+            {
+                if (globalDataSet.DebugMode) Debug.Write("Exception in UpdateDatabase(): " + e);
+            }
+        }
+
+
 
         public void deleteDatabaseContent(string dBdescription)
         {

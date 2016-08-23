@@ -11,6 +11,7 @@ namespace WindowsFormsApplication6
 {
     public class GlobalDataSet
     {
+        private int MAX_TABLE_AMOUNT = Properties.Settings.Default.MAX_TABLE_AMOUNT;
         private bool stopAllOperations = false;
         private long timerValue;
         private bool debugMode;
@@ -21,6 +22,7 @@ namespace WindowsFormsApplication6
         private bool firstWriteExecuted = false;
         private float factor = (1023f / 300f);
         private SerialPort serialPort;
+        private int[] maxTableRows;
 
 
         public bool NextPositionRequest
@@ -150,6 +152,32 @@ namespace WindowsFormsApplication6
             set
             {
                 serialPort = value;
+            }
+        }
+
+        public int MaxTableAmount
+        {
+            get
+            {
+                return MAX_TABLE_AMOUNT;
+            }
+
+            set
+            {
+                MAX_TABLE_AMOUNT = value;
+            }
+        }
+
+        public int[] MaxTableRows
+        {
+            get
+            {
+                return maxTableRows;
+            }
+
+            set
+            {
+                maxTableRows = value;
             }
         }
     }

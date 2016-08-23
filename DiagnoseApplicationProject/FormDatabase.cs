@@ -42,11 +42,9 @@ namespace WindowsFormsApplication6
         private CheckBox xSenderCheckbox;
         private CheckBox ySenderCheckbox;
         private CheckBox zSenderCheckbox;
-        private DatabaseList dataBaseList;
         private CheckBox senderCheckbox;
         private int savedRowCounter;
         private int tablePresentID = -1;
-        private int MAX_TABLE_AMOUNT = Properties.Settings.Default.MAX_TABLE_AMOUNT;
         private int MIN_TABLE_AMOUNT = Properties.Settings.Default.MIN_TABLE_AMOUNT;
         private float SAMPLE_TIME = Properties.Settings.Default.SAMPLE_TIME;
         private int DEFAULT_SAMPLE_TIME_FACTOR = Properties.Settings.Default.DEFAULT_SAMPLE_TIME_FACTOR;
@@ -56,6 +54,7 @@ namespace WindowsFormsApplication6
         double[] Rx_x = new double[3];
         double[] Rx_y = new double[3];
         double[] Rx_z = new double[3];
+        private DatabaseList dataBaseList;
 
         private float recordDuration;
         //private RBC.Configuration dllConfiguration = null;
@@ -74,6 +73,7 @@ namespace WindowsFormsApplication6
         private Thread movementControlThread;
         private bool startTransfer = false;
         private RobotControl robotControl;
+        private bool loadRemoteDatabase;
 
         #region FORM
         public FormMain()
@@ -99,6 +99,7 @@ namespace WindowsFormsApplication6
             movementControlThread = new Thread(movementControl);
 
             // Initialize
+            loadRemoteDatabase = true; // TODO: Set this value in dependent of an external update-file (download file and check if update is available?)
             notInUseByGraph = true;
             notInUseByDatabase = true;
             sampleStep = DEFAULT_SAMPLE_TIME_FACTOR;
@@ -137,7 +138,13 @@ namespace WindowsFormsApplication6
         {
             try
             {
-                backgroundWorker_CreateLocalDb.RunWorkerAsync();
+                // Load remote db and create local db with modified control data
+                if (loadRemoteDatabase) backgroundWorker_CreateLocalDb.RunWorkerAsync();
+                else
+                {
+                    // Load from local database
+                    // TODO: Create dataset from local db, get tablesizes, etc.
+                }
             }
             catch (Exception err)
             {
@@ -169,7 +176,7 @@ namespace WindowsFormsApplication6
 
             if (((CheckBox)sender).Checked)
             {
-                dataBaseList = new DatabaseList(this, globalDataSet.DataSet, databaseConnection, 1);
+                dataBaseList = new DatabaseList(this, globalDataSet, databaseConnection, 1);
                 dataBaseList.Show();
             }
             else
@@ -278,7 +285,8 @@ namespace WindowsFormsApplication6
                 serialPort.Open();
                 globalDataSet.SerialPort = serialPort;
             }
-            catch {
+            catch
+            {
                 Debug.WriteLine("Exception in init com port");
             }
         }
@@ -287,24 +295,50 @@ namespace WindowsFormsApplication6
         {
 
         }
-       
+
         private void backgroundWorker_CreateLocalDb_DoWork(object sender, DoWorkEventArgs e)
         {
-            // Get the BackgroundWorker that raised this event.
             BackgroundWorker worker = sender as BackgroundWorker;
-
-
-            e.Result = xampp_getContent("moveforward", 0);
+            e.Result = xampp_getContent("moveforward");
         }
 
         private void backgroundWorker_CreateLocalDb_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            DataSet dataSet = (DataSet)e.Result;
-            globalDataSet.DataSet = dataSet;
-            writeToDb((DataSet)e.Result, "moveforward");
+            try
+            {
+                // Modify dataset with remote to get the real control values for dynamixels
+                DataSet dataSetMod = createDmxlControlData((DataSet)e.Result);
+
+                // Set modified dataset to local database
+                databaseConnection.UpdateLocalDatabase(dataSetMod, Properties.Settings.Default.ConnectionString_DataBase);
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message);
+            }
             enableVisualComponents();
 
+            // Initialize com port to connect to openCM board
             backgroundWorker_InitComPort.RunWorkerAsync();
+        }
+
+        private DataSet createDmxlControlData(DataSet dataSetRaw)
+        {
+            DataSet dataSetMod = dataSetRaw;
+            // TODO: Modify content of dataS
+            for (int i = 0; i < globalDataSet.MaxTableAmount; i++)
+            {
+                for (int row = 0; row < globalDataSet.MaxTableRows[i]; row++)
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        // TODO: Copy and modify value from remote db 
+                        dataSetMod.Tables[i].Rows[row]. = ((int)dataSetRaw.Tables[i].Rows[row].ItemArray.GetValue(j) / 100) * globalDataSet.Factor;
+                    }
+                }
+            }
+
+            return dataSetMod;
         }
 
         private void enableVisualComponents()
@@ -349,7 +383,7 @@ namespace WindowsFormsApplication6
             try
             {
                 cmd = connection.CreateCommand();
-                cmd.CommandText = "DELETE FROM s"+tableId+" WHERE 1";
+                cmd.CommandText = "DELETE FROM s" + tableId + " WHERE 1";
                 cmd.ExecuteNonQuery();
             }
             catch (Exception)
@@ -366,9 +400,31 @@ namespace WindowsFormsApplication6
             }
         }
 
-        private DataSet xampp_getContent(string dbName, int tableId)
+        private DataSet xampp_getContent(string dbName)
         {
             DataSet dataSet = new DataSet();
+
+            string conStringXampp = "Server=localhost;Database=" + dbName + "; Uid=root;Pwd=rbc;";
+            MySqlConnection connection = new MySqlConnection(conStringXampp);
+            MySqlCommand cmd;
+            connection.Open();
+
+            // Get remote database content and save it to dataset
+            for (int i = 0; i < globalDataSet.MaxTableAmount; i++)
+            {
+                cmd = connection.CreateCommand();
+                cmd.CommandText = "SELECT * FROM s" + i;
+                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
+                adapter.Fill(dataSet, "s" + i);
+            }
+            // Get table sizes
+            globalDataSet.MaxTableRows = databaseConnection.getTableSizeForDb(dataSet);
+
+            return dataSet;
+        }
+
+        private void xampp_addContent(string dbName, int tableId, Decimal[] data)
+        {
             string conStringXampp = "Server=localhost;Database=" + dbName + "; Uid=root;Pwd=rbc;";
             MySqlConnection connection = new MySqlConnection(conStringXampp);
             MySqlCommand cmd;
@@ -377,30 +433,7 @@ namespace WindowsFormsApplication6
             try
             {
                 cmd = connection.CreateCommand();
-                cmd.CommandText = "SELECT * FROM s"+tableId;
-                MySqlDataAdapter adapter = new MySqlDataAdapter(cmd);
-                adapter.Fill(dataSet);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-
-            return dataSet;
-        }
-
-        private void xampp_addContent(string dbName, int tableId, Decimal[] data)
-        {
-            string conStringXampp = "Server=localhost;Database="+ dbName+"; Uid=root;Pwd=rbc;";
-            MySqlConnection connection = new MySqlConnection(conStringXampp);
-            MySqlCommand cmd;
-            connection.Open();
-
-            try
-            {
-                cmd = connection.CreateCommand();
-                cmd.CommandText = "INSERT INTO s"+ tableId + "(x,y,z,timestamp)VALUES(@x,@y,@z,@timestamp)";
+                cmd.CommandText = "INSERT INTO s" + tableId + "(x,y,z,timestamp)VALUES(@x,@y,@z,@timestamp)";
                 cmd.Parameters.AddWithValue("@x", data[0]);
                 cmd.Parameters.AddWithValue("@y", data[1]);
                 cmd.Parameters.AddWithValue("@z", data[2]);
@@ -432,7 +465,7 @@ namespace WindowsFormsApplication6
             if (globalDataSet.ShowProgramDuration) globalDataSet.Timer_programExecution.Stop();
 
             globalDataSet.StopAllOperations = true;
-            if(globalDataSet.SerialPort.IsOpen) globalDataSet.SerialPort.Close();
+            if (globalDataSet.SerialPort.IsOpen) globalDataSet.SerialPort.Close();
 
             if (System.Windows.Forms.Application.MessageLoop)
             {
@@ -451,22 +484,6 @@ namespace WindowsFormsApplication6
             textBox_Info.Clear();
         }
 
-        private void writeToDb(DataSet dataSet, string dbName)
-        {
-            if (dataSet != null)
-            {
-                try
-                {
-                    databaseConnection.UpdateDatabase(dataSet, 0, Properties.Settings.Default.ConnectionString_DataBase);
-                    //maxTableRows_Db1[0]++;
-                }
-                catch (Exception err)
-                {
-                    MessageBox.Show(err.Message);
-                }
-            }
-
-        }
         #endregion
     }
 }

@@ -66,39 +66,14 @@ namespace WindowsFormsApplication6
             for (int k = 0; k < steps; k++)
             {
                 counter = 0;
-                // TODO: Add length variable for the count of rows per table (not hardcoded 23!!!)
-                while (counter < 23)
+                // Every table in one database / dataset have the same length. Therefor we can take the size of the first table
+                while (counter < globalDataSet.MaxTableRows[0])
                 {
-                    // TODO: Add more tables...
-                    int dataT = (int)globalDataSet.DataSet.Tables[0].Rows[counter].ItemArray.GetValue(2);
-
-                    // Set position from database for dxl 1
-                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
-                    for (int i = 0; i < position.Length; i++) byteArray[i + 18] = position[i];
-
-                    // Set position from database for dxl 2
-                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
-                    for (int i = 0; i < position.Length; i++) byteArray[i + 20] = position[i];
-
-                    // Set position from database for dxl 3
-                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
-                    for (int i = 0; i < position.Length; i++) byteArray[i + 22] = position[i];
-
-                    // Set position from database for dxl 4
-                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
-                    for (int i = 0; i < position.Length; i++) byteArray[i + 24] = position[i];
-
-                    // Set position from database for dxl 5
-                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
-                    for (int i = 0; i < position.Length; i++) byteArray[i + 26] = position[i];
-
-                    // Set position from database for dxl 6
-                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
-                    for (int i = 0; i < position.Length; i++) byteArray[i + 28] = position[i];
-
-                    // Set position from database for dxl 7
-                    position = BitConverter.GetBytes((short)Math.Round((dataT / 100) * globalDataSet.Factor, 0));
-                    for (int i = 0; i < position.Length; i++) byteArray[i + 30] = position[i];
+                    for (int j = 0; j < globalDataSet.MaxTableAmount; j++)
+                    {
+                        position = BitConverter.GetBytes((short)Math.Round(((int)globalDataSet.DataSet.Tables[j].Rows[counter].ItemArray.GetValue(2) / 100) * globalDataSet.Factor, 0));
+                        for (int i = 0; i < position.Length; i++) byteArray[i + 18 + (j * 2)] = position[i];
+                    }
 
                     counter++;
                     sendToPort(byteArray);

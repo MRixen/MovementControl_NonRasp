@@ -25,7 +25,7 @@ namespace WindowsFormsApplication6.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        [global::System.Configuration.DefaultSettingValueAttribute("7")]
         public int MAX_TABLE_AMOUNT {
             get {
                 return ((int)(this["MAX_TABLE_AMOUNT"]));

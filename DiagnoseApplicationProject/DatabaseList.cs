@@ -21,15 +21,17 @@ namespace WindowsFormsApplication6
         private System.ComponentModel.BackgroundWorker backgroundWorker_readDataset;
         private HelperFunctions helperFunctions;
         private int databaseId;
+        private GlobalDataSet globalDataSet;
 
-        public DatabaseList(FormMain context, DataSet dataSet, DatabaseConnection databaseConnection, int databaseId)
+        public DatabaseList(FormMain context, GlobalDataSet globalDataSet, DatabaseConnection databaseConnection, int databaseId)
         {
             InitializeComponent();
 
-            this.formBaseContext = context;
             this.databaseConnection = databaseConnection;
-            this.dataSet = dataSet;
             this.databaseId = databaseId;
+            this.globalDataSet = globalDataSet;
+            dataSet = this.globalDataSet.DataSet;
+            formBaseContext = context;
             helperFunctions = new HelperFunctions();
 
             backgroundWorker_readDataset.DoWork += new DoWorkEventHandler(backgroundWorker_readDataset_DoWork);
@@ -38,6 +40,8 @@ namespace WindowsFormsApplication6
             this.tableID = Int32.Parse(numericUpDown_tableSelector.Text);
             helperFunctions.changeElementText(labelListEntries, "List entries: " + dataSet.Tables[tableID].Rows.Count.ToString(), false);
             helperFunctions.changeElementText(labelDatabaseId, "Database ID: " + databaseId, false);
+
+            backgroundWorker_readDataset.RunWorkerAsync();
         }
 
         private void backgroundWorker_readDataset_DoWork(object sender, DoWorkEventArgs e)
@@ -59,30 +63,30 @@ namespace WindowsFormsApplication6
         {
             if (dataSet != null)
             {
-                int[] maxTableRows = databaseConnection.getTableSizeForDb(dataSet);
+                int[] maxTableRows = globalDataSet.MaxTableRows;
 
                 for (int j = 0; j < maxTableRows[tableID]; j++)
+                {
+                    DataRow dataRow = dataSet.Tables[tableID].Rows[j];
+                    ListViewItem listViewItemsTemp = new ListViewItem();
+
+                    element[0] = dataRow.ItemArray.GetValue(1).ToString();
+                    listViewItemsTemp = new ListViewItem(element[0]);
+
+                    for (int k = 0; k < 4; k++)
                     {
-                        DataRow dataRow = dataSet.Tables[tableID].Rows[j];
-                        ListViewItem listViewItemsTemp = new ListViewItem();                       
-
-                        element[0] = dataRow.ItemArray.GetValue(1).ToString();
-                        listViewItemsTemp = new ListViewItem(element[0]);
-
-                        for (int k = 1; k < 4; k++)
-                        {
-                            element[k] = dataRow.ItemArray.GetValue(k).ToString();
-                            listViewItemsTemp.SubItems.Add(element[k]);
-                        }
-
-                        listViewDatabaseContent.BeginInvoke((MethodInvoker)delegate() { listViewDatabaseContent.Items.AddRange(new ListViewItem[] { listViewItemsTemp }); });
+                        element[k] = dataRow.ItemArray.GetValue(k).ToString();
+                        listViewItemsTemp.SubItems.Add(element[k]);
                     }
+
+                    listViewDatabaseContent.BeginInvoke((MethodInvoker)delegate () { listViewDatabaseContent.Items.AddRange(new ListViewItem[] { listViewItemsTemp }); });
+                }
             }
         }
 
         private void FormDatabase_Load(object sender, EventArgs e)
         {        
-            backgroundWorker_readDataset.RunWorkerAsync();
+            
         }
 
         private void numericUpDown_valueChanged(object sender, EventArgs e)

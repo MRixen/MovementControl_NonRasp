@@ -111,7 +111,7 @@
             // 
             this.numericUpDown_tableSelector.Location = new System.Drawing.Point(72, 5);
             this.numericUpDown_tableSelector.Maximum = new decimal(new int[] {
-            3,
+            6,
             0,
             0,
             0});
