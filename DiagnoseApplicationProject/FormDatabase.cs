@@ -306,8 +306,9 @@ namespace WindowsFormsApplication6
         {
             try
             {
-                // Modify dataset with remote to get the real control values for dynamixels
-                DataSet dataSetMod = createDmxlControlData((DataSet)e.Result);
+                // Modify dataset with remote content to get the real control values for dynamixels
+                DataSet dataSetMod = createDmxlControlData(e.Result);
+                globalDataSet.DataSet = dataSetMod;
 
                 // Set modified dataset to local database
                 databaseConnection.UpdateLocalDatabase(dataSetMod, Properties.Settings.Default.ConnectionString_DataBase);
@@ -322,23 +323,29 @@ namespace WindowsFormsApplication6
             backgroundWorker_InitComPort.RunWorkerAsync();
         }
 
-        private DataSet createDmxlControlData(DataSet dataSetRaw)
+        private DataSet createDmxlControlData(object dataSetRaw)
         {
-            DataSet dataSetMod = dataSetRaw;
-            // TODO: Modify content of dataS
-            for (int i = 0; i < globalDataSet.MaxTableAmount; i++)
+            DataSet dataSetRawTemp = (DataSet)dataSetRaw;
+
+            for (int tableCounter = 0; tableCounter < globalDataSet.MaxTableAmount; tableCounter++)
             {
-                for (int row = 0; row < globalDataSet.MaxTableRows[i]; row++)
+                for (int rowCounter = 0; rowCounter < globalDataSet.MaxTableRows[tableCounter]; rowCounter++)
                 {
-                    for (int j = 0; j < 4; j++)
+                    DataRow dataRow = dataSetRawTemp.Tables[tableCounter].Rows[rowCounter];
+                    int item = 0;
+
+                    for (int itemCounter = 0; itemCounter < 3; itemCounter++)
                     {
-                        // TODO: Copy and modify value from remote db 
-                        dataSetMod.Tables[i].Rows[row]. = ((int)dataSetRaw.Tables[i].Rows[row].ItemArray.GetValue(j) / 100) * globalDataSet.Factor;
+                        item =  (int)Math.Round( ( (int)dataRow.ItemArray.GetValue(itemCounter) / 100) *globalDataSet.Factor, 0);
+                        dataSetRawTemp.Tables[tableCounter].Rows[rowCounter][itemCounter] = item;
                     }
+                    item = (int)dataRow.ItemArray.GetValue(3);
+                    dataSetRawTemp.Tables[tableCounter].Rows[rowCounter][3] = item;
                 }
+                dataSetRawTemp.Tables[tableCounter].AcceptChanges();
             }
 
-            return dataSetMod;
+            return dataSetRawTemp;
         }
 
         private void enableVisualComponents()

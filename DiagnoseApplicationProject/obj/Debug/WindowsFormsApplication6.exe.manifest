@@ -66,14 +66,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="WindowsFormsApplication6.exe" size="4313024">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="WindowsFormsApplication6.exe" size="4313536">
       <assemblyIdentity name="WindowsFormsApplication6" version="1.0.0.0" language="neutral" processorArchitecture="amd64" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>lhllrz0AMhwmU4DVqEfNcPNIYiz2qsn5Ak7zFodT7mc=</dsig:DigestValue>
+        <dsig:DigestValue>dlMXbMO53pAtLAQI+QxIHbUO/1PvYl5KFjfrm51vUOY=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
